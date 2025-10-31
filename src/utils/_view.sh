@@ -77,6 +77,9 @@ dcal() {
         if [[ $gca_skip -ne 1 ]]; then
             gca_init
         fi
+        if [[ ${num_caldav:-0} -gt 0 ]]; then
+            caldav_init
+        fi
     fi
 
     # Determine the scenario of running the function
@@ -861,11 +864,15 @@ view_monthly_events_details() {
     # Print the lines in two columns
     for (( i=0; i<$num_lines; i++ )); do
         # Get the line for the current row in each column
-        local first_line=${first_half[$i]% #gc}
+        local first_line=${first_half[$i]}
+        first_line=${first_line% #gc}
         first_line=${first_line% #oh}
+        first_line=${first_line/% #cv*/}
         first_line=${first_line:-""}
-        local second_line=${second_half[$i]% #gc}
+        local second_line=${second_half[$i]}
+        second_line=${second_line% #gc}
         second_line=${second_line% #oh}
+        second_line=${second_line/% #cv*/}
         second_line=${second_line:-""}
 
         # Inject ANSI codes into first_line and second_line

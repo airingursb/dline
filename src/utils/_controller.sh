@@ -194,6 +194,15 @@ parse_json() {
     done < <(echo "$json" | jq -r '.gca | to_entries[] | "\(.key)=\(.value)"')
     num_gca=${i}
 
+    i=0
+    while IFS="=" read -r key value; do
+        for attr in slug name url username password category start_date end_date imported_date sync_interval_hours synced_at; do
+            defaults["caldav[$i][$attr]"]=$(echo "$value" | jq -r ".$attr // \"\"")
+        done
+        ((i++))
+    done < <(echo "$json" | jq -r '.caldav | to_entries[] | "\(.key)=\(.value)"')
+    num_caldav=${i}
+
     for attr in verbose legend school scheduled_cleanup oha_imported oha_country_iso oha_language_iso oha_subdivision_iso gca_skip process_overdues; do
         defaults["$attr"]=$(echo "$json" | jq -r ".$attr")
     done
@@ -1149,6 +1158,16 @@ cleanup_inactive_pids() {
     done
 }
 
+
+# CalDAV integration
+caldav_init() {
+    if [[ ${src_caldav:-0} -eq 0 ]]; then
+        source ${SCRIPTPATH}/${API}/caldav.sh
+        src_caldav=1
+    fi
+
+    caldav_handle "$1"
+}
 
 # Google Calendar integration
 gca_init() {

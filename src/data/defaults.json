@@ -21,6 +21,7 @@
     "oha_subdivision_iso": "",
     "gca_skip": 0,
     "gca": [],
+    "caldav": [],
     "process_overdues": 0,
     "active_file": ""
 }
