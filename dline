@@ -1,4 +1,28 @@
 #!/usr/bin/env bash
+
+if [[ -z ${BASH_VERSION:-} ]]; then
+    echo "dline must be executed with bash." >&2
+    echo "Please run it as 'bash dline ...'." >&2
+    exit 1
+fi
+
+if (( BASH_VERSINFO[0] < 4 )); then
+    for candidate in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+        if [[ -x $candidate && $candidate != "$BASH" ]]; then
+            exec "$candidate" "$0" "$@"
+        fi
+    done
+    cat >&2 <<'EOF'
+dline requires Bash 4.0 or newer because it relies on associative arrays and
+modern parameter expansion. Install a newer Bash (for example with
+'brew install bash') and run the script with it, e.g.:
+
+  /opt/homebrew/bin/bash dline ...
+
+EOF
+    exit 1
+fi
+
 declare -A MSG
 declare -A defaults
 declare -A report_workday

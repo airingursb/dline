@@ -5,6 +5,8 @@
 
 Designed for developers, dLine makes managing your schedule smooth and efficient.
 
+> **Bash requirement:** dLine needs Bash 4.0 or newer. On macOS install a modern Bash with `brew install bash` (or via MacPorts) and run the tool as `/opt/homebrew/bin/bash dline ...` so associative arrays and CalDAV workflows work correctly.
+
 ## Features
 
 ![Features](https://i.imgur.com/RphflCb.png)
