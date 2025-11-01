@@ -5,6 +5,8 @@
 
 Designed for developers, dLine makes managing your schedule smooth and efficient.
 
+> **Shell requirement:** dLine needs modern shell features (Bash 4+ or Zsh). On macOS you can simply run `./dline`; it will automatically fall back to `/bin/zsh` when the default Bash 3.2 lacks the required capabilities.
+
 ## Features
 
 ![Features](https://i.imgur.com/RphflCb.png)
@@ -20,6 +22,9 @@ Need to count workdays between two dates? `dline -w start_date end_date` does it
 
 - Administration:
 Easily manage your calendar datasets with `dline -b`. Add, delete, update, and clean your data as needed. Switching between multiple calendars or importing public holidays is simple. There's even a way to terminate all reminder processes.
+
+- CalDAV integration:
+Bind CalDAV calendars interactively with `dline -i CALDAV`, automatically refresh them, and manage them alongside your other schedules.
 
 On the first launch, dLine will ask for your region to fetch relevant holidays. Don't worry — you can change this later if needed.
 
@@ -53,11 +58,11 @@ Options:
  -b, --base                                                   Manage your data, as snapshots of your changes
                                                               (file management)
  -c, --clean                                                  Remove old entries
- -d, --delete [GCA|OHA|pattern]                               Delete imported calendars, or local matching entries.
+ -d, --delete [GCA|OHA|CALDAV|pattern]                         Delete imported calendars, or local matching entries.
  -e, --export                                                 Export calendar to TSV format
  -f, --filter [x] [x] ...                                     Toggle visibility of one or more categories
  -h, --help                                                   Show help
- -i, --import [TSV|GCA|OHA]                                   Import events from external sources
+ -i, --import [TSV|GCA|OHA|CALDAV]                            Import events from external sources
  -k, --kill                                                   Terminate pending reminders
  -l, --legend                                                 Toggle legend display
  -m, --month [yyyy/mm]                                        Show monthly calendar
@@ -66,7 +71,8 @@ Options:
  -r, --resolve                                                Interactive dialogue to resolve deadlines
  -s, --school [0|1]                                           Set school holidays as work days (0) or holidays (1)
  -t, --test [yyyy/mm/dd]                                      Set "today" for testing
- -u, --update [GCA|OHA] | [pattern] [yyyy/mm/dd] [x] [desc]   Update from APIs or local matching entries
+ -u, --update [GCA|OHA|CALDAV] | [pattern] [yyyy/mm/dd] [x] [desc]
+                                                              Update from APIs or local matching entries
  -v, --version                                                Show version
  -w, --workdays [start_date] [end_date]                       Calculate workdays from optional start_date
                                                               (default: today) to end_date
@@ -119,6 +125,12 @@ Use `dline -f` and input the category codes you wish to view or hide (e.g. `dlin
 
 - `events_data.txt`: Default data file, but upon creation of a new calendar, a file with a prefix is added. It's possible to switch between the existing calendars by `dline -b` > `Select`.
 
+#### CalDAV Calendars:
+
+- Run `dline -i CALDAV` to bind a CalDAV calendar. You'll be prompted for the calendar URL (supports direct `.ics` exports or CalDAV collection endpoints), optional credentials, the event category, sync window, and refresh interval.
+- Bound calendars are refreshed automatically according to the configured interval whenever you launch `dline`. You can trigger an immediate refresh with `dline -u CALDAV`.
+- Remove a bound calendar with `dline -d CALDAV`.
+
 
 ## Installation
 
@@ -146,9 +158,7 @@ Holiday data based on [OpenHolidays API](https://www.openholidaysapi.org/)
 
 ### Minimum Requirements:
 
-Bash Version: dLine requires Bash 4.0 or newer. Older versions (e.g., Bash 3.x on macOS) will not work correctly due to unsupported features like associative arrays.
-
-- To update Bash on macOS: Use Homebrew (`brew install bash`).
+Shell: dLine relies on associative arrays and other modern shell features. It runs directly on Bash 4+; on systems that still ship Bash 3.2 (such as macOS) it automatically re-executes itself with `zsh`. You can also launch it manually via `zsh dline ...` if preferred.
 
 
 ### Holiday Data and Google Calendar Integration:

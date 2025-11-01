@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if ! type to_upper >/dev/null 2>&1; then
+    SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd -P)"
+    source "${SCRIPT_DIR}/../lib/shell_compat.sh"
+fi
+
 # Define the URLs
 URL_countries="https://openholidaysapi.org/Countries"
 URL_languages="https://openholidaysapi.org/Languages"
@@ -70,13 +75,13 @@ input_language() {
         read -p "Please choose a language from the list above (enter the value in square brackets): " language_key
 
         # Convert the user's input to uppercase
-        language_key=${language_key^^}
+        language_key=$(to_upper "$language_key")
 
         # Validate the user's input
         for line in "${language_options[@]}"; do
             language_isoCode=$(echo "${line}" | cut -d' ' -f1)
             language_name=$(echo "${line}" | cut -d' ' -f2-)
-            if [[ "${language_isoCode^^}" == "${language_key}" ]]; then
+            if [[ $(to_upper "$language_isoCode") == "$language_key" ]]; then
                 echo "▸▸▸ Selected: ${language_name}"
                 echo
                 valid=true
@@ -115,13 +120,13 @@ input_country() {
     while [ "$valid" = false ]; do
         # Prompt the user to choose a key
         read -p "Please choose a key from the list above: " key
-        key=${key^^}
+        key=$(to_upper "$key")
 
         # Validate the user's input
         while IFS= read -r line; do
             country_isoCode=$(echo "${line}" | cut -d' ' -f1)
             country_name=$(echo "${line}" | cut -d' ' -f2-)
-            if [ "${key}" == "${country_isoCode^^}" ]; then
+            if [[ "$key" == $(to_upper "$country_isoCode") ]]; then
                 echo "▸▸▸ Selected: ${country_name}"
                 echo
                 valid=true
@@ -169,14 +174,14 @@ input_subdivisions() {
         while [ "$valid" = false ]; do
             # Prompt the user to choose a subdivision
             read -p "Please choose a subdivision from the list above: " subdivision
-            subdivision=${subdivision^^}
+            subdivision=$(to_upper "$subdivision")
 
             # Validate the user's input
             while IFS= read -r line; do
                 subdivision_isoCode=$(echo "${line}" | cut -d' ' -f1)
                 subdivision_shortName=$(echo "${line}" | cut -d' ' -f2)
                 subdivision_name=$(echo "${line}" | cut -d' ' -f3-)
-                if [ "${subdivision}" == "${subdivision_shortName^^}" ]; then
+                if [[ "$subdivision" == $(to_upper "$subdivision_shortName") ]]; then
                     echo "▸▸▸ Selected: ${subdivision_name}"
                     echo
                     valid=true
@@ -331,25 +336,26 @@ oha() {
     content_countries=$(cat "$TMP_FILE_COUNTRIES")
     content_languages=$(cat "$TMP_FILE_LANGUAGES")
 
+    local action_upper=$(to_upper "${1:-}")
     oha_country_iso="$(echo "${oha_country_iso}" | xargs)"
-    if [[ -z "${oha_country_iso}" || "${oha_country_iso}" =~ ^0 || "${1^^}" == "IMPORT" ]]; then
+    if [[ -z "${oha_country_iso}" || "${oha_country_iso}" =~ ^0 || "$action_upper" == "IMPORT" ]]; then
         input_country
         update_oha_country_log
     else
         key=$oha_country_iso
     fi
-    if [[ ${key^^} == "X" ]]; then
+    if [[ $(to_upper "$key") == "X" ]]; then
         return 0
     fi
     oha_language_iso="$(echo "${oha_language_iso}" | xargs)"
-    if [[ -z "${oha_language_iso}" || "${oha_language_iso}" =~ ^0 || "${1^^}" == "IMPORT" ]]; then
+    if [[ -z "${oha_language_iso}" || "${oha_language_iso}" =~ ^0 || "$action_upper" == "IMPORT" ]]; then
         input_language
         update_oha_language_log
     else
         language_key=$oha_language_iso
     fi
     oha_subdivision_iso="$(echo "${oha_subdivision_iso}" | xargs)"
-    if [[ -z "${oha_subdivision_iso}" || "${oha_subdivision_iso}" =~ ^0 || "${1^^}" == "IMPORT" ]]; then
+    if [[ -z "${oha_subdivision_iso}" || "${oha_subdivision_iso}" =~ ^0 || "$action_upper" == "IMPORT" ]]; then
         input_subdivisions
         update_oha_subdivision_log
     else

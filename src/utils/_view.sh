@@ -69,13 +69,16 @@ dcal() {
             source ${SCRIPTPATH}/${API}/oha.sh
             oha
             update_api_date_log
-            if [[ ${oha_country_iso^^} != "X" ]]; then
+            if [[ $(to_upper "$oha_country_iso") != "X" ]]; then
                 sort_input
             fi
         fi
 
         if [[ $gca_skip -ne 1 ]]; then
             gca_init
+        fi
+        if [[ ${num_caldav:-0} -gt 0 ]]; then
+            caldav_init
         fi
     fi
 
@@ -85,8 +88,8 @@ dcal() {
         # Mode: Calendar Calculator View
         # read end_timestamp end_date_input end_date_formatted workdays days end_dow description <<< $(get_next_deadline "${current_date}" "${end_date}")
         count_group_events "${current_date}" "${end_date}"
-        if [[ "${month_name^^}" != "${end_date_month^^}" ]]; then
-            month_name="${month_name^^} - ${end_date_month^^}"
+        if [[ $(to_upper "$month_name") != $(to_upper "$end_date_month") ]]; then
+            month_name="$(to_upper "$month_name") - $(to_upper "$end_date_month")"
         fi
     else
         # read end_timestamp end_date_input end_date_formatted workdays days end_dow description <<< $(get_next_deadline)
@@ -516,7 +519,7 @@ print_month_line() {
     [[ $highlight_cols -lt $(( max_total_cols )) ]] && printf '%.s─' $(seq "$((highlight_cols + 1))" "$((max_total_cols - 1))")
 
     # Print the month name
-    echo -e "${reset} ${month_name^^}"
+    echo -e "${reset} $(to_upper "$month_name")"
 }
 
 
@@ -861,11 +864,15 @@ view_monthly_events_details() {
     # Print the lines in two columns
     for (( i=0; i<$num_lines; i++ )); do
         # Get the line for the current row in each column
-        local first_line=${first_half[$i]% #gc}
+        local first_line=${first_half[$i]}
+        first_line=${first_line% #gc}
         first_line=${first_line% #oh}
+        first_line=${first_line/% #cv*/}
         first_line=${first_line:-""}
-        local second_line=${second_half[$i]% #gc}
+        local second_line=${second_half[$i]}
+        second_line=${second_line% #gc}
         second_line=${second_line% #oh}
+        second_line=${second_line/% #cv*/}
         second_line=${second_line:-""}
 
         # Inject ANSI codes into first_line and second_line

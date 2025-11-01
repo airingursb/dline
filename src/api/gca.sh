@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if ! type to_upper >/dev/null 2>&1; then
+    SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd -P)"
+    source "${SCRIPT_DIR}/../lib/shell_compat.sh"
+fi
+
 # Specify your date range
 _gca_start_date=${TODAY////-}
 _gca_end_date="${next_year}-12-31"
@@ -50,10 +55,11 @@ delete_gca_json() {
         read -p "Enter a calendar code: " choice
 
         # Check if the choice is a valid calendar "key"
-        if [[ ( "${choice}" =~ ^[1-9][0-9]*$ && ${choice} -le ${j} && ${choice} -gt 0 ) || ${choice^^} == "A" || ${choice^^} == "X" ]]; then
-            if [[ ${choice^^} == "A" ]]; then
+        choice_upper=$(to_upper "$choice")
+        if [[ ( "${choice}" =~ ^[1-9][0-9]*$ && ${choice} -le ${j} && ${choice} -gt 0 ) || $choice_upper == "A" || $choice_upper == "X" ]]; then
+            if [[ $choice_upper == "A" ]]; then
                 selected_cal="All calendars"
-            elif [[ ${choice^^} == "X" ]]; then
+            elif [[ $choice_upper == "X" ]]; then
                 echo "Operation cancelled"
                 echo
                 return
@@ -64,7 +70,7 @@ delete_gca_json() {
             fi
             echo "▸▸▸ Selected: ${selected_cal}"
             echo
-            if [[ ${choice^^} == "A" ]]; then
+            if [[ $choice_upper == "A" ]]; then
                 if delete_line " #gc$"; then
                     jq 'del(.gca[] | select(.name != ""))' ${SETTINGS} > temp.json && mv temp.json ${SETTINGS}
                 fi
@@ -142,12 +148,13 @@ import_gca() {
                 read -p "Select an option: " choice
 
                 # Check if the choice is a valid integer or "x"
-                if [[ "$choice" =~ ^[1-9][0-9]*$ && "$choice" -le "${#calendar_array[@]}" || "${choice^^}" == "A" || "${choice^^}" == "X" ]]; then
-                    if [ "${choice^^}" == "X" ]; then
+                choice_upper=$(to_upper "$choice")
+                if [[ "$choice" =~ ^[1-9][0-9]*$ && "$choice" -le "${#calendar_array[@]}" || "$choice_upper" == "A" || "$choice_upper" == "X" ]]; then
+                    if [ "$choice_upper" == "X" ]; then
                         jq --argjson gca_skip 1 '.gca_skip = $gca_skip' $SETTINGS > tmp.$$.json && mv tmp.$$.json $SETTINGS && echo "▸▸▸ Selected: Don't ask me again"
                         echo
                         return
-                    elif [ "${choice^^}" == "A" ]; then
+                    elif [ "$choice_upper" == "A" ]; then
                         selectAll=1
                         remaining=${remaining_gca} # Prevent importing more calendars
                         echo "▸▸▸ Selected: All calendars"

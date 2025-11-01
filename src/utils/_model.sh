@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if ! type to_upper >/dev/null 2>&1; then
+    SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd -P)"
+    source "${SCRIPT_DIR}/../lib/shell_compat.sh"
+fi
+
 # Add a new event
 # NOTE: The value is validated then stored in `./.deadline`
 set_dcal() {
@@ -601,7 +606,7 @@ file_options() {
         prefix=$(echo ${line} | awk '{print $4}')
 
         printf -v size "%*s" $maxsize "$size"
-        if [[ -f "${SCRIPTPATH}/${DATA}/${default_filename}" && -w "${SCRIPTPATH}/${DATA}/${default_filename}" && ${prefix^^} == "DEFAULT" ]]; then
+        if [[ -f "${SCRIPTPATH}/${DATA}/${default_filename}" && -w "${SCRIPTPATH}/${DATA}/${default_filename}" && $(to_upper "$prefix") == "DEFAULT" ]]; then
             echo -e " [${green}${i}${reset}] ${size} ${date} ${time} ${green}${prefix}${reset}"
             tags+=("${prefix}")
         elif [[ -f "${SCRIPTPATH}/${DATA}/${prefix}_${default_filename}" && -w "${SCRIPTPATH}/${DATA}/${prefix}_${default_filename}" ]]; then
@@ -658,7 +663,7 @@ view_file() {
         read -p "Choose a file to view [1-${opt}]: " FILE
     done
     (( FILE-- ))
-    if [[ "${tags[$FILE]^^}" != "DEFAULT" ]]; then
+    if [[ $(to_upper "${tags[$FILE]}") != "DEFAULT" ]]; then
         prefix="${tags[$FILE]}_"
     fi
 
@@ -733,7 +738,7 @@ select_file() {
             read -p "Choose a file to be selected [1-${opt}]: " REPLY
         done
         (( REPLY-- ))
-        if [[ "${tags[$REPLY]^^}" != "DEFAULT" ]]; then
+        if [[ $(to_upper "${tags[$REPLY]}") != "DEFAULT" ]]; then
             prefix="${tags[$REPLY]}_"
         fi
         if [[ -n $REPLY ]]; then
@@ -776,7 +781,7 @@ edit_file() {
         read -p "Choose a file to be edited [1-${opt}]: " FILE
     done
     (( FILE-- ))
-    if [[ "${tags[$FILE]^^}" != "DEFAULT" ]]; then
+    if [[ $(to_upper "${tags[$FILE]}") != "DEFAULT" ]]; then
         prefix="${tags[$FILE]}_"
     fi
 
@@ -825,7 +830,7 @@ rename_file() {
         read -p "Choose a file to be renamed [1-${opt}]: " REPLY
     done
     (( REPLY-- ))
-    if [[ "${tags[$REPLY]^^}" != "DEFAULT" ]]; then
+    if [[ $(to_upper "${tags[$REPLY]}") != "DEFAULT" ]]; then
         prefix="${tags[$REPLY]}_"
     fi
     if [[ -n $REPLY ]]; then
@@ -890,7 +895,7 @@ delete_file() {
         read -p "Choose a file to be deleted [1-${opt}]: " REPLY
     done
     (( REPLY-- ))
-    if [[ "${tags[$REPLY]^^}" != "DEFAULT" ]]; then
+    if [[ $(to_upper "${tags[$REPLY]}") != "DEFAULT" ]]; then
         prefix="${tags[$REPLY]}_"
     fi
     if [[ -n $REPLY && "${prefix}${default_filename}" == "${defaults["active_file"]}" ]]; then
