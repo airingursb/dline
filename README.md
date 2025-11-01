@@ -5,7 +5,7 @@
 
 Designed for developers, dLine makes managing your schedule smooth and efficient.
 
-> **Bash requirement:** dLine needs Bash 4.0 or newer. On macOS install a modern Bash with `brew install bash` (or via MacPorts) and run the tool as `/opt/homebrew/bin/bash dline ...` so associative arrays and CalDAV workflows work correctly.
+> **Shell requirement:** dLine needs modern shell features (Bash 4+ or Zsh). On macOS you can simply run `./dline`; it will automatically fall back to `/bin/zsh` when the default Bash 3.2 lacks the required capabilities.
 
 ## Features
 
@@ -158,9 +158,7 @@ Holiday data based on [OpenHolidays API](https://www.openholidaysapi.org/)
 
 ### Minimum Requirements:
 
-Bash Version: dLine requires Bash 4.0 or newer. Older versions (e.g., Bash 3.x on macOS) will not work correctly due to unsupported features like associative arrays.
-
-- To update Bash on macOS: Use Homebrew (`brew install bash`).
+Shell: dLine relies on associative arrays and other modern shell features. It runs directly on Bash 4+; on systems that still ship Bash 3.2 (such as macOS) it automatically re-executes itself with `zsh`. You can also launch it manually via `zsh dline ...` if preferred.
 
 
 ### Holiday Data and Google Calendar Integration:

@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if ! type to_upper >/dev/null 2>&1; then
+    SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd -P)"
+    source "${SCRIPT_DIR}/../lib/shell_compat.sh"
+fi
+
 caldav_tag_prefix="#cv"
 
 caldav_slugify() {
@@ -394,9 +399,10 @@ caldav_bind_calendar() {
         calendar_name="CalDAV calendar"
     fi
 
-    local auth_choice
+    local auth_choice auth_choice_lower
     read -p "Does this calendar require authentication? [y/N] " auth_choice
-    if [[ ${auth_choice,,} == "y" || ${auth_choice,,} == "yes" ]]; then
+    auth_choice_lower=$(to_lower "$auth_choice")
+    if [[ $auth_choice_lower == "y" || $auth_choice_lower == "yes" ]]; then
         read -p "Username: " username
         read -s -p "Password or app password: " password
         echo
@@ -469,14 +475,15 @@ caldav_delete_calendars() {
     echo -e " [${yellow}X${reset}] Cancel"
     echo
 
-    local choice
+    local choice choice_upper
     while true; do
         read -p "Enter a calendar code: " choice
-        if [[ ${choice^^} == "X" ]]; then
+        choice_upper=$(to_upper "$choice")
+        if [[ $choice_upper == "X" ]]; then
             echo "Operation cancelled"
             echo
             return
-        elif [[ ${choice^^} == "A" && ${num_caldav} -gt 1 ]]; then
+        elif [[ $choice_upper == "A" && ${num_caldav} -gt 1 ]]; then
             for (( i=0; i<${num_caldav}; i++ )); do
                 local slug=${defaults["caldav[$i][slug]"]}
                 caldav_remove_lines "$slug"
@@ -587,7 +594,7 @@ caldav_auto_update() {
 }
 
 caldav_handle() {
-    local action="${1^^}"
+    local action="$(to_upper "$1")"
     case "$action" in
         "IMPORT")
             caldav_bind_calendar

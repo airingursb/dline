@@ -69,7 +69,7 @@ dcal() {
             source ${SCRIPTPATH}/${API}/oha.sh
             oha
             update_api_date_log
-            if [[ ${oha_country_iso^^} != "X" ]]; then
+            if [[ $(to_upper "$oha_country_iso") != "X" ]]; then
                 sort_input
             fi
         fi
@@ -88,8 +88,8 @@ dcal() {
         # Mode: Calendar Calculator View
         # read end_timestamp end_date_input end_date_formatted workdays days end_dow description <<< $(get_next_deadline "${current_date}" "${end_date}")
         count_group_events "${current_date}" "${end_date}"
-        if [[ "${month_name^^}" != "${end_date_month^^}" ]]; then
-            month_name="${month_name^^} - ${end_date_month^^}"
+        if [[ $(to_upper "$month_name") != $(to_upper "$end_date_month") ]]; then
+            month_name="$(to_upper "$month_name") - $(to_upper "$end_date_month")"
         fi
     else
         # read end_timestamp end_date_input end_date_formatted workdays days end_dow description <<< $(get_next_deadline)
@@ -519,7 +519,7 @@ print_month_line() {
     [[ $highlight_cols -lt $(( max_total_cols )) ]] && printf '%.s─' $(seq "$((highlight_cols + 1))" "$((max_total_cols - 1))")
 
     # Print the month name
-    echo -e "${reset} ${month_name^^}"
+    echo -e "${reset} $(to_upper "$month_name")"
 }
 
 

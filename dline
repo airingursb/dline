@@ -1,23 +1,19 @@
 #!/usr/bin/env bash
 
-if [[ -z ${BASH_VERSION:-} ]]; then
-    echo "dline must be executed with bash." >&2
-    echo "Please run it as 'bash dline ...'." >&2
+if [[ -z ${BASH_VERSION:-} && -z ${ZSH_VERSION:-} ]]; then
+    echo "dline must be executed with bash or zsh." >&2
+    echo "Please run it as 'bash dline ...' or 'zsh dline ...'." >&2
     exit 1
 fi
 
-if (( BASH_VERSINFO[0] < 4 )); then
-    for candidate in /opt/homebrew/bin/bash /usr/local/bin/bash; do
-        if [[ -x $candidate && $candidate != "$BASH" ]]; then
-            exec "$candidate" "$0" "$@"
-        fi
-    done
+if [[ -n ${BASH_VERSION:-} && ${BASH_VERSINFO[0]:-0} -lt 4 ]]; then
+    if [[ -z ${DLINE_ZSH_EMULATED:-} && -x $(command -v zsh 2>/dev/null) ]]; then
+        exec env DLINE_ZSH_EMULATED=1 zsh "$0" "$@"
+    fi
     cat >&2 <<'EOF'
-dline requires Bash 4.0 or newer because it relies on associative arrays and
-modern parameter expansion. Install a newer Bash (for example with
-'brew install bash') and run the script with it, e.g.:
+dline needs modern shell features. Install Bash 4+ or run it with zsh:
 
-  /opt/homebrew/bin/bash dline ...
+  zsh dline ...
 
 EOF
     exit 1
@@ -144,6 +140,8 @@ SCRIPTPATH="$(
     cd -- "$(dirname "$0")" >/dev/null 2>&1
     pwd -P
 )"
+
+source "${SCRIPTPATH}/src/lib/shell_compat.sh"
 
 # Check if the file .dlinerc exists and source it if possible
 CONF="${SCRIPTPATH}/.dlinerc"
@@ -338,7 +336,7 @@ for pass in 1 2; do
               d="set"
               shift
               PATTERN="$1"
-              case "${PATTERN^^}" in
+              case "$(to_upper "$PATTERN")" in
                   "GCA"|"OHA"|"CALDAV")
                       if [ -n "$2" ]; then
                           error "$@"
@@ -408,7 +406,7 @@ for pass in 1 2; do
               i="set"
               shift
               TYPE="$1"
-              case "${TYPE^^}" in
+              case "$(to_upper "$TYPE")" in
                   "TSV"|"GCA"|"OHA"|"CALDAV")
                       ;;
                   *)
@@ -430,7 +428,7 @@ for pass in 1 2; do
               u="set"
               shift
               PATTERN="$1"
-              case "${PATTERN^^}" in
+              case "$(to_upper "$PATTERN")" in
                   "GCA"|"OHA"|"CALDAV")
                       if [ -n "$2" ]; then
                           error "$@"
@@ -520,7 +518,7 @@ elif [[ "$b" == "set" ]]; then
     unset b
     exit 0
 elif [[ "$i" == "set" ]]; then
-    case "${TYPE^^}" in
+    case "$(to_upper "$TYPE")" in
         "TSV")
             import_from_tsv
             ;;
@@ -564,7 +562,7 @@ elif [[ "$c" == "set" ]]; then
     unset c
     exit 0
 elif [[ "$d" == "set" ]]; then
-    case "${PATTERN^^}" in
+    case "$(to_upper "$PATTERN")" in
         "GCA")
             [[ ${src_gca} -eq 0 ]] && source ${SCRIPTPATH}/${API}/gca.sh
             src_gca=1
@@ -595,7 +593,7 @@ elif [[ "$f" == "set" ]]; then
     unset f
     exit 0
 elif [[ "$u" == "set" ]]; then
-    case "${PATTERN^^}" in
+    case "$(to_upper "$PATTERN")" in
         "GCA")
             [[ ${src_gca} -eq 0 ]] && source ${SCRIPTPATH}/${API}/gca.sh
             src_gca=1
